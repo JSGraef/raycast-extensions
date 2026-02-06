@@ -1,7 +1,7 @@
-import { ActionPanel, Detail, List, Action, Icon, Color, showToast, Toast, Alert, confirmAlert } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, Color, showToast, Toast, Alert, confirmAlert, trash } from "@raycast/api";
 import { useFetch, useCachedPromise } from "@raycast/utils";
 import { exec } from "child_process";
-import { readdir, stat, readFile, rm } from "fs/promises";
+import { readdir, stat, readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 import { useState } from "react";
@@ -278,13 +278,13 @@ async function uninstallSkill(skill: InstalledSkill, onUninstall: () => void) {
 
   try {
     // Remove from global skills dir
-    await rm(skill.path, { recursive: true, force: true });
+    await trash(skill.path);
 
     // Remove from each agent dir where installed
     for (const [, agentSkillsDir] of Object.entries(AGENT_DIRS)) {
       const agentSkillPath = join(agentSkillsDir, skill.dirName);
       if (await dirExists(agentSkillPath)) {
-        await rm(agentSkillPath, { recursive: true, force: true });
+        await trash(agentSkillPath);
       }
     }
 
