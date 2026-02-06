@@ -1,4 +1,16 @@
-import { ActionPanel, Detail, List, Action, Icon, Color, showToast, Toast, Alert, confirmAlert, trash } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+  Alert,
+  confirmAlert,
+  trash,
+} from "@raycast/api";
 import { useFetch, useCachedPromise } from "@raycast/utils";
 import { exec } from "child_process";
 import { readdir, stat, readFile } from "fs/promises";
