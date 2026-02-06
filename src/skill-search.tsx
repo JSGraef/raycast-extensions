@@ -190,8 +190,6 @@ function InlineDetail({ skill }: { skill: Skill }) {
 \`\`\`bash
 ${installCommand}
 \`\`\`
-
-[View on skills.sh](https://skills.sh/${skill.id})
 `;
 
   return (
@@ -343,7 +341,10 @@ function InstalledSkillDetail({ skill, onUninstall }: { skill: InstalledSkill; o
   const { data: markdownContent, isLoading } = useCachedPromise(
     async (path: string) => {
       const content = await readFile(path, "utf-8");
-      return stripFrontmatter(content);
+      const body = stripFrontmatter(content);
+      const header = `# ${skill.name}`;
+      const desc = skill.description ? `\n\n*${skill.description}*` : "";
+      return `${header}${desc}\n\n---\n\n${body}`;
     },
     [join(skill.path, "SKILL.md")],
   );
@@ -354,7 +355,7 @@ function InstalledSkillDetail({ skill, onUninstall }: { skill: InstalledSkill; o
       markdown={markdownContent ?? `# ${skill.name}\n\n*Loading...*`}
       metadata={
         <Detail.Metadata>
-          {skill.description ? <Detail.Metadata.Label title="Description" text={skill.description} /> : null}
+          <Detail.Metadata.Label title="Name" text={skill.name} />
           <Detail.Metadata.Separator />
           {skill.agents.length > 0 ? (
             <Detail.Metadata.TagList title="Installed On">

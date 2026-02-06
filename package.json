@@ -3,7 +3,7 @@
   "name": "skill-search",
   "title": "Skill Search",
   "description": "Search agent skills",
-  "icon": "extension-icon.png",
+  "icon": "skill-search.png",
   "author": "josh_graef",
   "platforms": [
     "macOS",
