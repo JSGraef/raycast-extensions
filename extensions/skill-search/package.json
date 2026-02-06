@@ -6,8 +6,7 @@
   "icon": "skill-search.png",
   "author": "josh_graef",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools"
