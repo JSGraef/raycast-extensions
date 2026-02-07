@@ -21,9 +21,20 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "type": "textfield",
+      "title": "Terminal Application",
+      "description": "Bundle ID or Name (e.g., iTerm, Ghostty)",
+      "default": "Terminal",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "yaml": "^2.7.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
