@@ -45,9 +45,7 @@ interface InstalledSkill {
   firstSeen: Date;
 }
 
-interface Preferences {
-  terminalApp?: string;
-}
+// Preferences interface is auto-generated in raycast-env.d.ts
 
 // ---------------------------------------------------------------------------
 // Constants
