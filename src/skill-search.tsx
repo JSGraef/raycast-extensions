@@ -10,12 +10,14 @@ import {
   Alert,
   confirmAlert,
   trash,
+  open,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useFetch, useCachedPromise } from "@raycast/utils";
-import { exec } from "child_process";
-import { readdir, stat, readFile } from "fs/promises";
-import { homedir } from "os";
+import { readdir, stat, readFile, writeFile } from "fs/promises";
+import { homedir, tmpdir } from "os";
 import { join } from "path";
+import { parse as parseYaml } from "yaml";
 import { useState } from "react";
 
 // ---------------------------------------------------------------------------
@@ -41,6 +43,10 @@ interface InstalledSkill {
   path: string;
   agents: string[];
   firstSeen: Date;
+}
+
+interface Preferences {
+  terminalApp?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -81,9 +87,12 @@ function getInstallCommand(skill: Skill): string {
   return `npx skills add ${skill.source} --skill ${skill.name}`;
 }
 
-function runInTerminal(command: string): void {
-  const escaped = command.replace(/"/g, '\\"');
-  exec(`osascript -e 'tell application "Terminal" to do script "${escaped}"'`);
+async function runInTerminal(command: string): Promise<void> {
+  const { terminalApp } = getPreferenceValues<Preferences>();
+  const app = terminalApp?.trim() || "Terminal";
+  const scriptPath = join(tmpdir(), "skill-search-install.command");
+  await writeFile(scriptPath, `#!/bin/bash\n${command}\n`, { mode: 0o755 });
+  await open(scriptPath, app);
 }
 
 function getInstallColor(installs: number): Color {
@@ -94,23 +103,24 @@ function getInstallColor(installs: number): Color {
 
 /** Strip YAML frontmatter from markdown content */
 function stripFrontmatter(content: string): string {
-  if (!content.startsWith("---")) return content;
-  const endIdx = content.indexOf("---", 3);
-  if (endIdx === -1) return content;
-  return content.slice(endIdx + 3).trim();
+  const match = content.match(/^---[^\S\n]*\n[\s\S]*?\n---[^\S\n]*(?:\n|$)/);
+  if (!match) return content;
+  return content.slice(match[0].length).trim();
 }
 
 /** Parse name and description from YAML frontmatter */
 function parseFrontmatter(content: string): { name?: string; description?: string } {
-  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
+  const fmMatch = content.match(/^---[^\S\n]*\n([\s\S]*?)\n---(?:\n|$)/);
   if (!fmMatch) return {};
-  const fm = fmMatch[1];
-  const nameMatch = fm.match(/name:\s*(.+)/);
-  const descMatch = fm.match(/description:\s*(.+)/);
-  return {
-    name: nameMatch?.[1]?.trim(),
-    description: descMatch?.[1]?.trim(),
-  };
+  try {
+    const data = parseYaml(fmMatch[1]);
+    return {
+      name: typeof data?.name === "string" ? data.name : undefined,
+      description: typeof data?.description === "string" ? data.description : undefined,
+    };
+  } catch {
+    return {};
+  }
 }
 
 /** Shorten a path by replacing the home dir with ~ */
@@ -260,7 +270,7 @@ function SkillActions({
         title="Send to Terminal"
         icon={Icon.Terminal}
         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-        onAction={() => runInTerminal(installCommand)}
+        onAction={async () => await runInTerminal(installCommand)}
       />
       <Action
         title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}
