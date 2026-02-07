@@ -381,7 +381,7 @@ function InstalledSkillDetail({ skill, onUninstall }: { skill: InstalledSkill; o
           <Detail.Metadata.Label title="Path" text={shortenPath(skill.path)} />
           <Detail.Metadata.Label
             title="First Seen"
-            text={skill.firstSeen.toLocaleDateString("en-US", {
+            text={skill.firstSeen.toLocaleDateString(undefined, {
               month: "long",
               day: "numeric",
               year: "numeric",
